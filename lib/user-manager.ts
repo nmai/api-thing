@@ -1,5 +1,9 @@
+import jwt from 'jsonwebtoken';
+import { Datastore } from '@google-cloud/datastore';
 import { User, UserRef } from "../model/user";
-import * as jwt from 'jsonwebtoken';
+import { entity } from '@google-cloud/datastore/build/src/entity';
+
+const datastore = new Datastore();
 
 export class UserManager {
 
@@ -31,4 +35,20 @@ export class UserManager {
     }
   }
 
+  // proof of concept
+  // datastore is pretty weak compared to firestore but lets just stick with it, we dont need anything advanced
+  public async getUser(id: string): Promise<any> {
+    let key = datastore.key(['user', id]);
+    let res = await datastore.get(key);
+    return res;
+  }
+
 }
+
+/**
+ * @todo tomorrow:
+ * 
+ * Switch user.id to user.key or user.path, maybe take it off the model entirely.
+ * UserRef will still need some identifier though, as that will be embedded in tokens,
+ * and we don't want to be basing the system on the username.
+ */

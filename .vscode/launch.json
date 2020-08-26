@@ -12,7 +12,8 @@
         "<node_internals>/**"
       ],
       "env": {
-        "DEBUG": "api-thing:*"
+        "DEBUG": "api-thing:*",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials.json",
       },
       "program": "${workspaceFolder}/bin/www",
       "args": ["${workspaceFolder}/bin/www"],

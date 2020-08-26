@@ -1,4 +1,5 @@
 import { UserManager } from '../lib/user-manager';
+
 const userManager = new UserManager();
 
 export async function AuthMiddleware(req, res, next) {
