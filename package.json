@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "PORT=80 ts-node ./bin/www",
+    "start": "npm install; PORT=80 ts-node ./bin/www",
     "start-local": "PORT=3000 ts-node ./bin/www"
   },
   "dependencies": {
