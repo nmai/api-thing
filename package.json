@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "PORT=80 ts-node ./bin/www",
+    "start": "GOOGLE_APPLICATION_CREDENTIALS='./.gcloud/gcloud-credentials-5.json' PORT=8080 ts-node ./bin/www",
     "start-local": "GOOGLE_APPLICATION_CREDENTIALS='./.gcloud/gcloud-credentials-5.json' PORT=3000 ts-node ./bin/www"
   },
   "dependencies": {
