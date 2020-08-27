@@ -13,7 +13,7 @@
       ],
       "env": {
         "DEBUG": "api-thing:*",
-        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials.json",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials-3.json",
       },
       "args": ["${workspaceFolder}/bin/www"],
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
@@ -29,7 +29,7 @@
       ],
       "env": {
         "DEBUG": "api-thing:*",
-        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials.json",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials-3.json",
       },
       "args": ["${workspaceFolder}/sandbox"],
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
