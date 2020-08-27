@@ -64,6 +64,8 @@ _Returns: `application/json`_
   'large-image'?: string,
 }
 ```
+> Note: this doesn't use any fancy way of finding a content snippet, we populate `snippet` with the first description meta tag the parser finds.
+
 _Example: (first encode the URL so it can be safely appended as a parameter: `encodeURIComponent('https://google.com')` => `"https%3A%2F%2Fgoogle.com"`)_
 GET `/parse/https%3A%2F%2Fgoogle.com`
 ```json
@@ -78,6 +80,7 @@ GET `/parse/https%3A%2F%2Fgoogle.com`
 ### GET `/translate/:url`
 _Returns: `text/html`_
 The translated version of the page body found at the URL.
+> Note: This is very limited, the GCloud Translate API only supports up to 30k characters at once. Many modern sites are much longer, due to meta, scripts, assets, etc. We attempt to mitigate this by passing along only the `<body>` node (leaving <head> out), but even so, only small+streamlined pages work. Try Google.com or something.
 
 _Example: (first encode the URL so it can be safely appended as a parameter: `encodeURIComponent('https://google.com')` => `"https%3A%2F%2Fgoogle.com"`)_
 GET `/translate/https%3A%2F%2Fgoogle.com`
