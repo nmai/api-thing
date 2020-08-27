@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm install; PORT=80 ts-node ./bin/www",
-    "start-local": "PORT=3000 ts-node ./bin/www"
+    "start-local": "GOOGLE_APPLICATION_CREDENTIALS='./.gcloud/gcloud-credentials-3.json' PORT=3000 ts-node ./bin/www"
   },
   "dependencies": {
     "@google-cloud/secret-manager": "^3.1.0",
