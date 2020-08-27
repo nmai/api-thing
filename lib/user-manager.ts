@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Datastore } from '@google-cloud/datastore';
-import { User, UserRef } from "../model/user";
+import { LoginResponse, User, UserRef } from "../model/user";
 import { hash, compare } from 'bcryptjs';
 import { v4 as uuid } from 'uuid';
 
@@ -9,7 +9,7 @@ const datastore = new Datastore();
 export class UserManager {
 
   /** returns JWT auth token upon successful validation of credentials */
-  public async loginWithCredentials(username: string, password: string): Promise<string> {
+  public static async loginWithCredentials(username: string, password: string): Promise<LoginResponse> {
     const user = await this.getUserByUsername(username);
     if (user == null)
       throw new Error('There are no users with that username');
@@ -18,10 +18,17 @@ export class UserManager {
     if (isPasswordValid == false)
       throw new Error('Incorrect password');
 
-    return await this.generateNewAuthToken(user);
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+      },
+      token: await this.generateNewAuthToken(user),
+    }
   }
 
-  public async createUser(username: string, password: string): Promise<User> {
+  /** was useful during testing, but currently not exposed on any endpoint */
+  public static async createUser(username: string, password: string): Promise<User> {
     const existingUser = await this.getUserByUsername(username);
     if (existingUser)
       throw new Error('That username is taken')
@@ -36,7 +43,7 @@ export class UserManager {
     return user;
   }
 
-  public async getUser(id: string): Promise<any> {
+  public static async getUser(id: string): Promise<any> {
     const key = datastore.key(['user', id]);
     const res = await datastore.get(key);
     return res;
@@ -44,7 +51,7 @@ export class UserManager {
 
 
   // encode
-  public generateNewAuthToken(user: User): string {
+  public static generateNewAuthToken(user: User): string {
     // copy only relevant info we want encoded in the token.
     const payload: UserRef = {
       id: user.id,
@@ -56,7 +63,7 @@ export class UserManager {
   }
 
   // decode
-  public async getValidUserFromToken(token: string): Promise<User> {
+  public static async getValidUserFromToken(token: string): Promise<User> {
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
     const userId = decodedToken.id;
     // ensure the user id exists, and that it appears valid
@@ -71,16 +78,16 @@ export class UserManager {
 
   // helpers
 
-  private async hashPassword(password: string): Promise<string> {
+  private static async hashPassword(password: string): Promise<string> {
     // hash the password with an automatically generated salt of length 10
     return await hash(password, 10);
   }
 
-  private async doesPasswordMatchHash(password: string, hash: string): Promise<boolean> {
+  private static async doesPasswordMatchHash(password: string, hash: string): Promise<boolean> {
     return await compare(password, hash);
   }
 
-  private async getUserByUsername(username: string): Promise<User | undefined> {
+  private static async getUserByUsername(username: string): Promise<User | undefined> {
     const query = datastore.createQuery('user').filter('username', username);
     const results = await datastore.runQuery(query);
     return results[0]?.[0] as User;

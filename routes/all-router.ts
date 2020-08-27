@@ -1,14 +1,36 @@
 import express from 'express';
-import { FileManager } from '../lib/file-manager';
+import { FileManager, uploader } from '../lib/file-manager';
 import { ParseManager } from '../lib/parse-manager';
 import { TranslateManager } from '../lib/translate-manager';
+import { UserManager } from '../lib/user-manager';
 import { AuthMiddleware } from '../middleware/auth';
-import { uploader } from '../lib/uploader';
+import { User, UserRef } from '../model/user';
 
 const router = express.Router();
 
+/**
+ * Create a new user account. Returns some basic info about the newly created user, but no token.
+ */
+router.post('/register/:username/:password', async (req, res, next) => {
+  try {
+    const user: User = await UserManager.createUser(req.params['username'], req.params['password']);
+    const ref: UserRef = { id: user.id, username: user.username };
+    res.send(ref);
+  } catch(e) {
+    next(e);
+  }
+});
+
+/**
+ * Returns some basic info about the user, and a JWT which can be used in a bearer token.
+ */
 router.post('/login/:username/:password', async (req, res, next) => {
-  res.render('index', { title: 'Express' });
+  try {
+    const data = await UserManager.loginWithCredentials(req.params['username'], req.params['password']);
+    res.send(data);
+  } catch(e) {
+    next(e);
+  }
 });
 
 /** Routes below require the JWT authorization token */

@@ -11,3 +11,8 @@ export interface UserRef {
   id: string,
   username: string,
 }
+
+export interface LoginResponse {
+  user: UserRef,
+  token: string,
+}
