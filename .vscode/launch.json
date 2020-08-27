@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch",
+      "name": "Launch server",
       "skipFiles": [
         "<node_internals>/**"
       ],
@@ -15,8 +15,23 @@
         "DEBUG": "api-thing:*",
         "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials.json",
       },
-      "program": "${workspaceFolder}/bin/www",
       "args": ["${workspaceFolder}/bin/www"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "console": "internalConsole",
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Sandbox script",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "DEBUG": "api-thing:*",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/.gcloud/gcloud-credentials.json",
+      },
+      "args": ["${workspaceFolder}/sandbox"],
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
       "console": "internalConsole",
       "outputCapture": "std",

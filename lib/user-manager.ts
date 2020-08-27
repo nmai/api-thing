@@ -1,21 +1,57 @@
 import jwt from 'jsonwebtoken';
 import { Datastore } from '@google-cloud/datastore';
 import { User, UserRef } from "../model/user";
-import { entity } from '@google-cloud/datastore/build/src/entity';
+import { hash, compare } from 'bcryptjs';
+import { v4 as uuid } from 'uuid';
 
 const datastore = new Datastore();
 
 export class UserManager {
 
+  /** returns JWT auth token upon successful validation of credentials */
+  public async loginWithCredentials(username: string, password: string): Promise<string> {
+    const user = await this.getUserByUsername(username);
+    if (user == null)
+      throw new Error('There are no users with that username');
+
+    const isPasswordValid = await this.doesPasswordMatchHash(password, user.passwordHash);
+    if (isPasswordValid == false)
+      throw new Error('Incorrect password');
+
+    return await this.generateNewAuthToken(user);
+  }
+
+  public async createUser(username: string, password: string): Promise<User> {
+    const existingUser = await this.getUserByUsername(username);
+    if (existingUser)
+      throw new Error('That username is taken')
+
+    const user: User = {
+      id: uuid(),
+      username: username,
+      passwordHash: await this.hashPassword(password),
+    }
+    const key = datastore.key(['user', user.id]);
+    await datastore.insert({ key: key, data: user, excludeFromIndexes: ['passwordHash'] });
+    return user;
+  }
+
+  public async getUser(id: string): Promise<any> {
+    const key = datastore.key(['user', id]);
+    const res = await datastore.get(key);
+    return res;
+  }
+
+
   // encode
   public generateNewAuthToken(user: User): string {
     // copy only relevant info we want encoded in the token.
-    let payload: UserRef = {
+    const payload: UserRef = {
       id: user.id,
       username: user.username,
     };
 
-    let signed = jwt.sign(payload, 'RANDOM_TOKEN_SECRET', { expiresIn: '1 day' });
+    const signed = jwt.sign(payload, 'RANDOM_TOKEN_SECRET', { expiresIn: '1 day' });
     return signed;
   }
 
@@ -28,27 +64,26 @@ export class UserManager {
       throw new Error('Failed to extract valid user from jwt');
     }
     // grab from database
-    return {
-      id: userId,
-      username: 'asdf',
-      passwordHash: 'alsdkf'
-    }
+    const user = await this.getUser(userId);
+    return user;
   }
 
-  // proof of concept
-  // datastore is pretty weak compared to firestore but lets just stick with it, we dont need anything advanced
-  public async getUser(id: string): Promise<any> {
-    let key = datastore.key(['user', id]);
-    let res = await datastore.get(key);
-    return res;
+
+  // helpers
+
+  private async hashPassword(password: string): Promise<string> {
+    // hash the password with an automatically generated salt of length 10
+    return await hash(password, 10);
+  }
+
+  private async doesPasswordMatchHash(password: string, hash: string): Promise<boolean> {
+    return await compare(password, hash);
+  }
+
+  private async getUserByUsername(username: string): Promise<User | undefined> {
+    const query = datastore.createQuery('user').filter('username', username);
+    const results = await datastore.runQuery(query);
+    return results[0]?.[0] as User;
   }
 
 }
-
-/**
- * @todo tomorrow:
- * 
- * Switch user.id to user.key or user.path, maybe take it off the model entirely.
- * UserRef will still need some identifier though, as that will be embedded in tokens,
- * and we don't want to be basing the system on the username.
- */
