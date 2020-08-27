@@ -4,6 +4,7 @@ import { ParseManager } from '../lib/parse-manager';
 import { TranslateManager } from '../lib/translate-manager';
 import { UserManager } from '../lib/user-manager';
 import { AuthMiddleware } from '../middleware/auth';
+import { UploadResponse } from '../model/file';
 import { User, UserRef } from '../model/user';
 
 const router = express.Router();
@@ -62,8 +63,11 @@ router.get('/translate/:url', AuthMiddleware, async (req, res, next) => {
 */
 router.post('/upload', AuthMiddleware, uploader.single('file'), async (req, res, next) => {
   try {
-    const data = await FileManager.processUpload(req.file);
-    res.send(data);
+    const identifier = await FileManager.processUpload(req.file);
+    const response: UploadResponse = {
+      identifier: identifier,
+    }
+    res.send(response);
   } catch(e) {
     next(e);
   }
