@@ -7,8 +7,7 @@ export async function AuthMiddleware(req, res, next) {
     req.user = user;
     next();
   } catch(e) {
-    res.status(403).json({
-      error: new Error('Authentication failed')
-    });
+    res.status(403)
+    next(new Error('Authentication failed'));
   }
 };
