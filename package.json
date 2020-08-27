@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "PORT=80 ts-node ./bin/www",
+    "start-local": "PORT=3000 ts-node ./bin/www"
   },
   "dependencies": {
     "@google-cloud/secret-manager": "^3.1.0",
