@@ -53,7 +53,7 @@ POST `/login/user100/password100`
 ```
 
 ### GET`/parse/:url`
-Note: you need to encode the url parameter first, with something like encodeURIComponent()
+> Warning: you need to encode the url parameter first, with something like encodeURIComponent()
 _Returns: `application/json`_
 ```ts
 {
@@ -78,11 +78,13 @@ GET `/parse/https%3A%2F%2Fgoogle.com`
 
 
 ### GET `/translate/:url`
+> Warning: you need to encode the url parameter first, with something like encodeURIComponent()
 _Returns: `text/html`_
 The translated version of the page body found at the URL.
 > Note: This is very limited, the GCloud Translate API only supports up to 30k characters at once. Many modern sites are much longer, due to meta, scripts, assets, etc. We attempt to mitigate this by passing along only the `<body>` node (leaving <head> out), but even so, only small+streamlined pages work. Try Google.com or something.
 
 _Example: (first encode the URL so it can be safely appended as a parameter: `encodeURIComponent('https://google.com')` => `"https%3A%2F%2Fgoogle.com"`)_
+
 GET `/translate/https%3A%2F%2Fgoogle.com`
 ![Translation output (Insomnia preview)](/screenshot-translation.png)
 
@@ -95,12 +97,17 @@ _Returns: `application/json`_
 ```
 
 _Example:_
+
 POST `/upload`
+
 Request headers:
 `Content-Type: multipart/form-data`
+
 Request body:
 `file: <your file>`
+
 Note the form field is literally called `file`.
+
 Response:
 ```json
 {
@@ -110,10 +117,13 @@ Response:
 In this case you can see it was a gif, but you can upload anything.
 
 ### GET `/download/:identifier`
+
 _Returns: `<file mimetype>`_
+
 The file for the given identifier
 
 _Example:_
+
 GET `/download/5814f97f-7045-4e73-8c2c-da298410073c.gif`
 ![Download output (Insomnia preview)](/screenshot-download.png)
 
