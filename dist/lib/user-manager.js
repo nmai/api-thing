@@ -44,6 +44,8 @@ var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var datastore_1 = require("@google-cloud/datastore");
 var bcryptjs_1 = require("bcryptjs");
 var uuid_1 = require("uuid");
+var secret_manager_1 = require("@google-cloud/secret-manager");
+var secretManager = new secret_manager_1.v1.SecretManagerServiceClient();
 var datastore = new datastore_1.Datastore();
 var UserManager = /** @class */ (function () {
     function UserManager() {
@@ -120,33 +122,48 @@ var UserManager = /** @class */ (function () {
             });
         });
     };
-    // encode
-    UserManager.generateNewAuthToken = function (user) {
-        // copy only relevant info we want encoded in the token.
-        var payload = {
-            id: user.id,
-            username: user.username
-        };
-        var signed = jsonwebtoken_1["default"].sign(payload, 'RANDOM_TOKEN_SECRET', { expiresIn: '1 day' });
-        return signed;
-    };
     // decode
     UserManager.getValidUserFromToken = function (token) {
         return __awaiter(this, void 0, void 0, function () {
-            var decodedToken, userId, user;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var decodedToken, _a, _b, _c, userId, user;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        decodedToken = jsonwebtoken_1["default"].verify(token, 'RANDOM_TOKEN_SECRET');
+                        _b = (_a = jsonwebtoken_1["default"]).verify;
+                        _c = [token];
+                        return [4 /*yield*/, this.getTokenSecret()];
+                    case 1:
+                        decodedToken = _b.apply(_a, _c.concat([_d.sent()]));
                         userId = decodedToken.id;
                         // ensure the user id exists, and that it appears valid
                         if (typeof userId != 'string' || userId.length == 0) {
                             throw new Error('Failed to extract valid user from jwt');
                         }
                         return [4 /*yield*/, this.getUser(userId)];
-                    case 1:
-                        user = _a.sent();
+                    case 2:
+                        user = _d.sent();
                         return [2 /*return*/, user];
+                }
+            });
+        });
+    };
+    // encode
+    UserManager.generateNewAuthToken = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            var payload, signed, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        payload = {
+                            id: user.id,
+                            username: user.username
+                        };
+                        _b = (_a = jsonwebtoken_1["default"]).sign;
+                        _c = [payload];
+                        return [4 /*yield*/, this.getTokenSecret()];
+                    case 1:
+                        signed = _b.apply(_a, _c.concat([_d.sent(), { expiresIn: '1 day' }]));
+                        return [2 /*return*/, signed];
                 }
             });
         });
@@ -186,6 +203,24 @@ var UserManager = /** @class */ (function () {
                     case 1:
                         results = _b.sent();
                         return [2 /*return*/, (_a = results[0]) === null || _a === void 0 ? void 0 : _a[0]];
+                }
+            });
+        });
+    };
+    /** caches the secret */
+    UserManager.getTokenSecret = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var version;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(this._tokenSecret == null)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, secretManager.accessSecretVersion({ name: 'projects/115643477901/secrets/token_secret/versions/1' })];
+                    case 1:
+                        version = (_a.sent())[0];
+                        this._tokenSecret = version.payload.data.toString();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, this._tokenSecret];
                 }
             });
         });
