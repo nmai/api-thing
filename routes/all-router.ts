@@ -33,7 +33,11 @@ router.get('/translate/:url', AuthMiddleware, async (req, res, next) => {
   }
 });
 
-/** looks for the file under the 'file' field of form data. */
+/**
+ * Looks for the file under the 'file' field of form data. 
+ * The returned identifier includes original file extension, but it's not the
+ * original filename - all uploads are uniquely saved.
+*/
 router.post('/upload', AuthMiddleware, uploader.single('file'), async (req, res, next) => {
   try {
     const data = await FileManager.processUpload(req.file);
@@ -45,7 +49,10 @@ router.post('/upload', AuthMiddleware, uploader.single('file'), async (req, res,
 
 router.get('/download/:identifier', AuthMiddleware, async (req, res, next) => {
   try {
-    
+    const identifier = req.params['identifier'];
+    res.attachment(identifier);
+    const stream = await FileManager.getFilestream(identifier);
+    stream.pipe(res);
   } catch(e) {
     next(e);
   }
