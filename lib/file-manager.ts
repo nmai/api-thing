@@ -26,8 +26,10 @@ export class FileManager {
 
   /**
    * looks like multer does all the heavy lifting
+   * 
+   * @todo: fix typing, having some namespace issue when deploying to gcloud
    */
-  public static async processUpload(file: Express.Multer.File): Promise<string> {
+  public static async processUpload(file: any): Promise<string> {
     if (file == null)
       throw new Error('Could not find the file. Please attach it to the "file" field.');
     
